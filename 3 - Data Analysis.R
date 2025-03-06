@@ -4,15 +4,26 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # install.packages("ARTofR") # Install only once
-library(ARTofR)
-ARTofR::xxx_title1('Select Variables of Interest')
-ARTofR::xxx_title3('View Results')
+# library(ARTofR)
+ARTofR::xxx_title1('Clean Data (EASY)')
+# ARTofR::xxx_title3('View Results')
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                                                            --
+##----------------------------- CLEAN DATA (EASY)-------------------------------
+##                                                                            --
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# This command runs the entirety of '1 - Data Cleaning.R' in the current session.
+source("1 - Data Cleaning.R")
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
 ##----------------------- SELECT VARIABLES OF INTEREST--------------------------
 ##                                                                            --
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 colnames(df)
 
 data<-df[,c(4,5,283:291,295:304,347:354)]
@@ -48,7 +59,8 @@ data$audit_total <- rowSums(data[, audit_columns], na.rm = FALSE)
 # For rows with NAs in any of the AUDIT columns, set audit_total to NA
 data$audit_total[!complete.cases(data[, audit_columns])] <- NA
 
-
+describe(data$audit_total)
+hist(data$audit_total)
 
 
 # Depression
@@ -62,7 +74,8 @@ data$phq9_total <- rowSums(data[, phq9_columns], na.rm = FALSE)
 # For rows with NAs in any of the PHQ9 columns, set phq9_total to NA
 data$phq9_total[!complete.cases(data[, phq9_columns])] <- NA
 
-
+describe(data$phq9_total)
+hist(data$phq9_total)
 
 
 # Flourishing
@@ -76,14 +89,23 @@ data$diener_mean <- rowMeans(data[, diener_columns], na.rm = FALSE)
 # For rows with NAs in any of the Diener columns, set diener_mean to NA
 data$diener_mean[!complete.cases(data[, diener_columns])] <- NA
 
+
+describe(data$diener_mean)
+hist(data$diener_mean)
+
+
 # Clean up data to remove individual items
 data<-dplyr::select(data, Gender_Male, audit_total, phq9_total, diener_mean)
+
+
 
 
 # Examine missingness
 finalfit::missing_plot(data)
 
 mcar_test(data)
+# Non-Significant MCAR Test -> Data is missing completely at random
+# List-wise deletion or Multiple Imputation appropriate
 data <- na.omit(data)
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,6 +126,7 @@ hist(data$phq9_total, main = "PHQ-9 Scores")
 ##  ~ View Correlation Matrix  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 cor.plot(data[,2:4])
+lowerCor(data[,2:4])
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,11 +135,11 @@ cor.plot(data[,2:4])
 
 # Test for equality of variances
 
-var.test(df$B_TobUse30 ~ df$Race_Asian)
-var.test(data$phq9_total ~ data$Gender_Male)
-var.test(data$diener_mean ~ data$Gender_Male)
+var.test(data$audit_total ~ data$Gender_Male) # Unequal Variance
+var.test(data$phq9_total ~ data$Gender_Male) # Equal Variance
+var.test(data$diener_mean ~ data$Gender_Male) # Unequal Variance
 
-# None of the variances are equal across gender
+# the variacne of audit_total & diener_mean differ signficantly by Male/Female (non-equal variance)
 
 var(na.omit(data[data$Gender_Male==1, "audit_total"]))
 var(na.omit(data[data$Gender_Male==0, "audit_total"]))
@@ -130,7 +153,7 @@ var(na.omit(data[data$Gender_Male==1, "diener_mean"]))
 var(na.omit(data[data$Gender_Male==0, "diener_mean"]))
 
 
-t.test(df$B_TobUse30 ~ df$Race_Asian, var.equal = F) 
+t.test(data$audit_total ~ data$Gender_Male, var.equal = F) 
 t.test(data$phq9_total ~ data$Gender_Male, var.equal = T)
 t.test(data$diener_mean ~ data$Gender_Male, var.equal = F) 
 
