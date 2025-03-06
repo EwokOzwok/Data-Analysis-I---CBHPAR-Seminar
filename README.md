@@ -8,8 +8,9 @@ This repository contains materials reviewed during the **Data Analysis I Seminar
 
 ## Contents
 
-- **PowerPoint Presentation**: Overview of missing data, Multiple Linear Regression (MLR), and assumptions of MLR.
-- **R Script**: Annotated R code showcasing techniques for evaluating and handling missing data, and MLR analysis and assumption diagnostics.
+- **PowerPoint Presentation**: Overview of examining and handling missing data and MLR analysis and assumption diagnostics.
+- **Video Links.docx'**: Links to YouTube videos to support your learning in this seminar.
+- **R Script**: Annotated R code showcasing techniques for evaluating and handling missing data, variable computation, and MLR analysis and assumption diagnostics.
 - **Seminar Recording**: The video recording will be added following the delivery of the seminar.
 
 ---
