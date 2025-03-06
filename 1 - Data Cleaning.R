@@ -4,11 +4,11 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # install.packages("ARTofR") # Install only once
-library(ARTofR)
-ARTofR::xxx_title1('Missing Data Analysis')
-ARTofR::xxx_title3('MCAR')
-ARTofR::xxx_title3('MAR')
-ARTofR::xxx_title3('MNAR')
+# library(ARTofR)
+# ARTofR::xxx_title1('Missing Data Analysis')
+# ARTofR::xxx_title3('MCAR')
+# ARTofR::xxx_title3('MAR')
+# ARTofR::xxx_title3('MNAR')
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                      Install Packages - Only done once                   ----
@@ -61,7 +61,7 @@ colnames(df)
 
 
 # Remove Header columns
-df <- df[,-c(1:4, 6:7, 9:18, 400:409)]
+df <- df[,-c(1:4, 6:7, 9:17, 399:408)]
 colnames(df)
 
 # Examine data-type for all variables
@@ -124,102 +124,7 @@ rm(clean_columns)
 ##~~~~~~~~~~~~~
 
 
-# Objectives: Accurately calcualte participants age using BirthMonth, BirthYear, and RecordedDate
-#             Account for NA's in BirthMonth
-#             Account for the lack of any Day of the Month for participant's Birthday
-
-# Accomplishing this ends up being pretty complex
-
-
-# Steps: 1.) Impute random months for missing BirthMonths (as opposed to only using BirthYear [no NA's])
-#        2.) Use dplyr & lubridate to calculate participants age (accounting for no birth days)
-#        3.) Create computed Age variable
-#        4.) Examine computed Age variable - checking for obvious errors
-#        5.) Remove now, unneeded variables from the data frame
-
-
-### Step 1: Impute random months for missing BirthMonths ###
-
-# Step by step code explanation #
-
-# Sample generates random numbers in a range, in this case 1 through 12 (birth months), with replacement 
-sample(1:12, 100, replace=T) # Here we're generating 100 random numbers
-
-# sum adds up the number of rows & is.na(df$BirthMonth) is a test of if BirthMonth is NA
-sum(is.na(df$BirthMonth)==T)
-1/nrow(df)
-
-# So, 1 rows of birth month are NA - 5% of the sample
-
-# Generate 1 random values between 1 and 12
-sample(1:12, sum(is.na(df$BirthMonth)), replace = TRUE) # OR alternatively: sample(1:12, 1, replace = TRUE)
-
-
-# Putting it all together using an ifelse() statement #
-
-# IF BirthMonth is NA, replace BirthMonth with the list of 135 randomly generated values
-# ELSE keep BirthMonth the same
-
-df$BirthMonth <- ifelse(is.na(df$BirthMonth), sample(1:12, sum(is.na(df$BirthMonth)), replace = TRUE), df$BirthMonth)
-
-describe(df$BirthMonth)
-hist(df$BirthMonth)
-
-
-
-### Step 2: Use dplyr & lubridate (make_date) to calculate participants age ###
-
-df <- df %>%
-  mutate(
-    DayOfBirthIMPUTED = sample(1:28, nrow(df), replace = TRUE),  # Safe range for all months
-    DOB = make_date(BirthYear, BirthMonth, DayOfBirthIMPUTED)
-  )
-
-
-### Step 3: Compute Age Variable ###
-
-# Step by Step Breakdown: #
-
-# df <- df %>%
-# This uses the pipe operator (%>%) from the dplyr package to pass the df data frame to the next function (mutate()).
-# 
-# mutate()
-# This function creates or modifies columns in a data frame. In this case, it is creating a new column called age.
-# 
-# age = year(RecordedDate) - year(DOB)
-# This part calculates the initial age by subtracting the birth year (DOB) from the year of RecordedDate.
-# 
-# ifelse(condition, true_value, false_value)
-# A conditional function:
-#   
-#   If the condition is true, it returns true_value, otherwise false_value.
-#
-# In this case:
-# month(RecordedDate) < month(DOB) | 
-# (month(RecordedDate) == month(DOB) & day(RecordedDate) < day(DOB))
-# checks if the birthday has already occurred in the RecordedDate year.
-
-# Condition Explanation:
-#   
-# month(RecordedDate) < month(DOB): Checks if the recorded month is before the birth month.
-# |: Logical OR operator.
-#
-# (month(RecordedDate) == month(DOB) & day(RecordedDate) < day(DOB)): Checks if the recorded month is the same as the birth month but the recorded day is before the birthday.
-#
-# Together, this condition determines whether the birthday has occurred in the current year.
-# 1, 0 in ifelse()
-# 
-# If the condition is TRUE, subtract 1 from the preliminary age.
-# Otherwise, subtract 0.
-
-
-df <- df %>%
-  mutate(
-    age = year(RecordedDate) - year(DOB) -
-      ifelse(month(RecordedDate) < month(DOB) | 
-               (month(RecordedDate) == month(DOB) & day(RecordedDate) < day(DOB)), 
-             1, 0)
-  )
+df$age <- year(df$RecordedDate)- df$BirthYear
 
 
 ### Step 4: Examine the age column ###
@@ -227,7 +132,7 @@ describe(df$age)
 hist(df$age)
 
 ### Step 5: Remove unneeded columns using dplyr
-df<-dplyr::select(df, -BirthYear, -BirthMonth, -DayOfBirthIMPUTED, -DOB)
+df<-dplyr::select(df, -BirthYear, -BirthMonth)
 
 # Reorganize to make age the 3rd variable
 df <- select(df, 1:2, age, everything())
@@ -494,6 +399,6 @@ sd(na.omit(df$age))
 
 
 # Cleanup Environment
-rm(combined_results, demo_df, demo_table, results_list, col_name, count, percent)
+rm(combined_results, demo_df, demo_table, results_list, col_name, count, percent, nice_demo_table)
 
 
