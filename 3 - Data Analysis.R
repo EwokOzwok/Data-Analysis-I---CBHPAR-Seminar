@@ -33,6 +33,7 @@ colnames(data)
 
 # Keep only rows where gender is either male or female
 
+
 data$remove<-ifelse(data$Gender_Female == 0 & data$Gender_Male==0,1,0)
 
 table(data$remove)
@@ -264,7 +265,7 @@ plot(fit)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~ 8: No Multicollinearity  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Variable Inflation Factor (VIF) should be less than 5 for all predictors
+# Variance Inflation Factor (VIF) should be less than 5 for all predictors
 # VIF MUST BE less than 10
 vif(fit)
 
@@ -343,7 +344,7 @@ ols_plot_dfbetas(fit)
 # Remove them and re-run analysis
 
 # Use Row Numbers in -c() for outliers you want to remove
-data_rvmd_outliers <- data[-c(5,6,82) , ]
+data_rvmd_outliers <- data[-c(5,6,32) , ]
 
 # Re-run the regression analysis with the new data with outliers removed and test all assumptions again...
 fit<-lm(phq9_total~audit_total+diener_mean+Gender_Male, data_rvmd_outliers)
@@ -450,6 +451,8 @@ lm_results_table <- nice_table(lm_results_table, title = "Multiple Linear Regres
 
 print(lm_results_table, preview = "docx")
 
+library(lm.beta)
+lm.beta(fit)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~ Robust Regression  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
