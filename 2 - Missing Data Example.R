@@ -71,7 +71,7 @@ set.seed(123)  # For reproducibility
 
 # Simulate data
 data <- tibble(
-  age = sample(18:80, 1000, replace = TRUE),  # Age between 18 and 80
+  age = sample(18:55, 1000, replace = TRUE),  # Age between 18 and 80
   satisfaction = sample(1:5, 1000, replace = TRUE),  # Satisfaction on a scale of 1 to 5
   income = sample(20000:100000, 1000, replace = TRUE)  # Income between 20k and 100k
 )
