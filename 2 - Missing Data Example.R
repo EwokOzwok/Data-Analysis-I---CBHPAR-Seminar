@@ -5,6 +5,7 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Plot all missing data (light blue)
+source("1 - Data Cleaning.R")
 missing_plot(df)
 
 
