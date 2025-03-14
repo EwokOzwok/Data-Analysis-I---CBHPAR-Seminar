@@ -442,10 +442,14 @@ summary(fit)
 
 
 library(rempsyc)
+
 lm_results_table <- nice_lm(fit)
+
 lm_results_table <- dplyr::select(lm_results_table, -`Dependent Variable`)
+
 results <- summary(fit)
 CIs <- confint(fit)
+
 Conf_lower <- CIs[2:4]
 Conf_upper <- CIs[6:8]
 
