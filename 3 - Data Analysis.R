@@ -33,12 +33,11 @@ colnames(data)
 
 # Keep only rows where gender is either male or female
 
-
 data$remove<-ifelse(data$Gender_Female == 0 & data$Gender_Male==0,1,0)
 
 table(data$remove)
 
-data<- data[data$remove == 0, ]
+data <- data[data$remove == 0, ]
 
 data<-dplyr::select(data,-remove)
 
@@ -100,9 +99,10 @@ data<-dplyr::select(data, Gender_Male, audit_total, phq9_total, diener_mean)
 
 
 
-
 # Examine missingness
 finalfit::missing_plot(data)
+finalfit::missing_pattern(data)
+
 
 mcar_test(data)
 # Non-Significant MCAR Test -> Data is missing completely at random
@@ -207,8 +207,6 @@ abline(fit, col="red")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~ 5: Homoskedasticity of residuals  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 
 # You must fit the model to test the 5th assumption 
 fit<-lm(phq9_total~audit_total+diener_mean+Gender_Male, data)
@@ -351,7 +349,6 @@ fit<-lm(phq9_total~audit_total+diener_mean+Gender_Male, data_rvmd_outliers)
 
 
 
-
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##           SATISFIED THE ASSUMPTIONS OF MLR? Display your results         ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -447,12 +444,28 @@ summary(fit)
 library(rempsyc)
 lm_results_table <- nice_lm(fit)
 lm_results_table <- dplyr::select(lm_results_table, -`Dependent Variable`)
+results <- summary(fit)
+CIs <- confint(fit)
+Conf_lower <- CIs[2:4]
+Conf_upper <- CIs[6:8]
+
+lm_results_table$CI_lower <- Conf_lower
+lm_results_table$CI_upper <- Conf_upper
+
+lm_results_table$SE <- results$coefficients[6:8]
+
+lm_results_table <- dplyr::select(lm_results_table, Predictor, b, SE, t, df, p, CI_lower, CI_upper)
+
+
 lm_results_table <- nice_table(lm_results_table, title = "Multiple Linear Regression Results")
+lm_results_table
+
 
 print(lm_results_table, preview = "docx")
 
 library(lm.beta)
 lm.beta(fit)
+lm.beta::coef.lm.beta()
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~ Robust Regression  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
